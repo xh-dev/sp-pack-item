@@ -3,9 +3,22 @@ package dev.xethh.sp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.javalin.Javalin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -98,6 +111,51 @@ public class Main {
             DtoReq data = om.readValue(context.body(), DtoReq.class);
             List<Box> boxes = BoxPacking.process(data.items, data.max);
             context.json(DtoResp.convert(boxes));
+        });
+
+        app.get("version", context -> {
+            Logger logger = LoggerFactory.getLogger("/version");
+            try{
+                Map<String, Object> map = new HashMap<>();
+                URL res = Main.class.getResource("/META-INF/maven/dev.xethh.sp/pack-item/pom.properties");
+                if(res != null){
+                    map.put("packaging", "jar");
+                    InputStream is = Main.class.getResourceAsStream("/META-INF/maven/dev.xethh.sp/pack-item/pom.properties");
+                    if(is == null){
+                        context.status(500);
+                        map.put("error", "fail to load pom.properties");
+                        context.json(map);
+                        return;
+                    } else {
+                        Properties p = new Properties();
+                        p.load(is);
+                        String version = p.getProperty("version", "unknown");
+                        map.put("version", version);
+                        context.json(map);
+                        return;
+                    }
+                } else {
+                    map.put("packaging", "file");
+
+                    InputStream is = new FileInputStream("pom.xml");
+                    Document dom = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+                    NodeList project = dom.getElementsByTagName("project").item(0).getChildNodes();
+                    for(int i = 0; i < project.getLength(); i++){
+                        Node item = project.item(i);
+                        if(item.getNodeName().equalsIgnoreCase("version")){
+                            map.put("version", item.getTextContent());
+                            context.json(map);
+                            return;
+                        }
+                    }
+                    map.put("version", "unknown");
+                    context.json(map);
+                    return;
+                }
+            } catch (Exception ex){
+                logger.error("Error process version",ex);
+            }
+
         });
     }
 }
