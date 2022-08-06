@@ -3,7 +3,7 @@ COPY . /app
 WORKDIR /app
 RUN mvn clean compile package assembly:single
 
-FROM amazoncorretto:17
+FROM amazoncorretto:18.0.1
 COPY --from=maven-build /app/target/app.jar /app/
 WORKDIR /app
 EXPOSE 8080
