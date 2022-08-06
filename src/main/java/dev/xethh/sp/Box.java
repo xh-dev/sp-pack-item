@@ -3,6 +3,7 @@ package dev.xethh.sp;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Box {
     private String name;
@@ -63,7 +64,7 @@ public class Box {
     }
 
     public List<Item> clear(){
-        List<Item> temp = this.items.stream().toList();
+        List<Item> temp = new ArrayList<>(this.items);
         this.items.clear();
         return temp;
     }

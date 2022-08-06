@@ -11,7 +11,7 @@ import java.math.RoundingMode;
 
 public class BigDecimalDeserializer extends JsonDeserializer<BigDecimal> {
     @Override
-    public BigDecimal deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public BigDecimal deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         return new BigDecimal(jsonParser.getValueAsString()).setScale(2, RoundingMode.HALF_UP);
     }
 }

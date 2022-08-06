@@ -6,6 +6,7 @@ import io.javalin.Javalin;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
     public static class DtoReq {
@@ -53,7 +54,7 @@ public class Main {
             public static Row convert(Box box) {
                 Row row = new Row();
                 row.setWeight(box.weight());
-                row.setItems(box.getItems().stream().map(Item::getName).toList());
+                row.setItems(box.getItems().stream().map(Item::getName).collect(Collectors.toList()));
                 return row;
             }
         }
@@ -79,7 +80,7 @@ public class Main {
 
         public static DtoResp convert(List<Box> boxes) {
             DtoResp resp = new DtoResp();
-            resp.setBoxes(boxes.stream().map(Row::convert).toList());
+            resp.setBoxes(boxes.stream().map(Row::convert).collect(Collectors.toList()));
             resp.setTotal(resp.boxes.stream().map(it -> it.weight).reduce(BigDecimal.ZERO, BigDecimal::add));
             return resp;
         }
